@@ -20,13 +20,13 @@ class PostalCodeLookupTest extends TestCase
 
         mkdir($this->emptyDirectory, 0755, true);
 
-        $this->writeFixtureFile('us/941.php', ['94105' => $this->entry('CA', ['San Francisco'])]);
-        $this->writeFixtureFile('us/006.php', ['00601' => $this->entry('PR', ['Adjuntas'])]);
+        $this->writeFixtureFile('941.php', ['94105' => $this->entry('CA', 'San Francisco')]);
+        $this->writeFixtureFile('006.php', ['00601' => $this->entry('PR', 'Adjuntas')]);
 
         // Each file below is what a malformed code would reach if find() cut or built the path
         // before checking the whole code, so a missing guard returns a match.
-        $this->writeFixtureFile('us/123.php', ['12345' => $this->entry('NY', ['Cut From 123456'])]);
-        $this->writeFixtureFile('.php', ['../x1' => $this->entry('CA', ['Path Traversal'])]);
+        $this->writeFixtureFile('123.php', ['12345' => $this->entry('NY', 'Cut From 123456')]);
+        $this->writeFixtureFile('.php', ['../x1' => $this->entry('CA', 'Path Traversal')]);
 
         $this->lookup = new PostalCodeLookup($this->fixtureDirectory);
     }
@@ -44,13 +44,22 @@ class PostalCodeLookupTest extends TestCase
 
         // Assert
         $this->assertSame('CA', $result[PostalCodeLookup::STATE]);
-        $this->assertSame(['San Francisco'], $result[PostalCodeLookup::CITIES]);
+        $this->assertSame('San Francisco', $result[PostalCodeLookup::CITY]);
     }
 
     public function testFindsAUsZipPlusFour(): void
     {
         // Act
         $result = $this->lookup->find(' 94105-1234 ');
+
+        // Assert
+        $this->assertSame('CA', $result[PostalCodeLookup::STATE]);
+    }
+
+    public function testFindsAUsZipPlusFourWithoutTheDash(): void
+    {
+        // Act
+        $result = $this->lookup->find('941051234');
 
         // Assert
         $this->assertSame('CA', $result[PostalCodeLookup::STATE]);
@@ -63,7 +72,7 @@ class PostalCodeLookupTest extends TestCase
 
         // Assert
         $this->assertSame('PR', $result[PostalCodeLookup::STATE]);
-        $this->assertSame('Adjuntas', $result[PostalCodeLookup::CITIES][0]);
+        $this->assertSame('Adjuntas', $result[PostalCodeLookup::CITY]);
     }
 
     public function testDefaultLookupReadsTheShippedUsData(): void
@@ -99,11 +108,13 @@ class PostalCodeLookupTest extends TestCase
         $this->assertNull($this->lookup->find('../x1'));
         $this->assertNull($this->lookup->find('123456'));
         $this->assertNull($this->lookup->find('1234'));
+        $this->assertNull($this->lookup->find('9410512345'));
+        $this->assertNull($this->lookup->find('94105-12'));
     }
 
-    protected function entry(string $state, array $cities): array
+    protected function entry(string $state, string $city): array
     {
-        return [PostalCodeLookup::STATE => $state, PostalCodeLookup::CITIES => $cities];
+        return [PostalCodeLookup::STATE => $state, PostalCodeLookup::CITY => $city];
     }
 
     protected function writeFixtureFile(string $relativePath, array $entries): void

@@ -3,7 +3,7 @@
 Offline US ZIP code lookup for PHP. No API calls, no database: the data ships as plain PHP arrays,
 split into one file per 3-digit prefix, so a lookup loads only one small file (and OPcache keeps it).
 
-- ZIP and ZIP+4 → state (USPS code) and city. Covers the 50 states, DC, PR, VI, GU, AS and MP.
+- ZIP, ZIP+4 (`94105-1234` or `941051234`) → state (USPS code) and city. Covers the 50 states, DC, PR, VI, GU, AS and MP.
 - State lists: `UsState` (50 states + DC) and `UsAddressState` (adds the territories).
 
 ## Install
@@ -21,7 +21,7 @@ use WckD123\UsPostalCodes\UsAddressState;
 $lookup = new PostalCodeLookup();
 
 $match = $lookup->find('94105-1234');
-// ['state' => 'CA', 'cities' => ['San Francisco']]
+// ['state' => 'CA', 'city' => 'San Francisco']
 
 UsAddressState::NAMES_BY_CODE[$match[PostalCodeLookup::STATE]]; // 'California'
 
@@ -31,6 +31,20 @@ $lookup->find('00000');  // null - unknown
 
 `find()` returns `null` for malformed and unknown ZIPs. Pass a folder to the constructor to read your
 own data (same layout as `data/`), e.g. a fixture in tests.
+
+## Performance and OPcache
+
+Each `find()` call loads the data file for the ZIP's first three digits (at most about 100 lines) with `require`.
+With OPcache on, that file is compiled once and later calls read it from shared memory, so lookups are cheap.
+
+OPcache is on by default for web requests (PHP-FPM, Apache) but **off by default on the command line**. For
+CLI scripts or queue workers that look up many ZIPs, turn it on in `php.ini`:
+
+```ini
+opcache.enable_cli=1
+```
+
+Without it, every call re-parses its file: still correct, just slower for bulk lookups.
 
 ## Regenerating the data
 

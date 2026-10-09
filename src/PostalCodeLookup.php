@@ -4,10 +4,10 @@ namespace WckD123\UsPostalCodes;
 
 class PostalCodeLookup
 {
-    public const STATE  = 'state';
-    public const CITIES = 'cities';
+    public const STATE = 'state';
+    public const CITY  = 'city';
 
-    protected const ZIP_PATTERN = '/^\d{5}(-\d{4})?$/';
+    protected const ZIP_PATTERN = '/^\d{5}(-?\d{4})?$/';
 
     protected const PREFIX_LENGTH = 3;
 
@@ -19,7 +19,7 @@ class PostalCodeLookup
     }
 
     /**
-     * Looks up a US ZIP or ZIP+4. Returns ['state' => USPS code, 'cities' => [...]] or null.
+     * Looks up a US ZIP or ZIP+4 (with or without the dash). Returns ['state' => USPS code, 'city' => name] or null.
      */
     public function find(string $zip): ?array
     {
@@ -30,7 +30,7 @@ class PostalCodeLookup
             return null;
         }
 
-        $path = $this->dataDirectory . '/us/' . substr($code, 0, self::PREFIX_LENGTH) . '.php';
+        $path = $this->dataDirectory . '/' . substr($code, 0, self::PREFIX_LENGTH) . '.php';
 
         // A missing prefix file means "no data", not an error.
         if (is_file($path) === false)

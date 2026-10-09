@@ -33,11 +33,26 @@ class PostalCodeGeneratorTest extends TestCase
         $lookup = new PostalCodeLookup($this->tmpOut);
 
         // The first row for a ZIP wins over the FPO repeat.
-        $this->assertSame(['state' => 'CA', 'cities' => ['San Francisco']], $lookup->find('94105'));
-        $this->assertSame(['state' => 'PR', 'cities' => ['Adjuntas']], $lookup->find('00601'));
+        $this->assertSame(['state' => 'CA', 'city' => 'San Francisco'], $lookup->find('94105'));
+        $this->assertSame(['state' => 'PR', 'city' => 'Adjuntas'], $lookup->find('00601'));
 
         // AA (armed forces) is not a state or territory, so it is skipped.
         $this->assertNull($lookup->find('96201'));
+    }
+
+    public function testGeneratorKeepsOtherFilesInTheOutputFolder(): void
+    {
+        // Arrange
+        mkdir($this->tmpOut, 0755, true);
+        file_put_contents($this->tmpOut . '/keep.php', '<?php');
+        file_put_contents($this->tmpOut . '/999.php', '<?php return [];');
+
+        // Act
+        $this->runGenerator(__DIR__ . '/fixtures/geonames');
+
+        // Assert
+        $this->assertFileExists($this->tmpOut . '/keep.php');
+        $this->assertFileDoesNotExist($this->tmpOut . '/999.php');
     }
 
     public function testGeneratorNamesAMissingSourceFile(): void
