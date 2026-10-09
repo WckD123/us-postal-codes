@@ -1,0 +1,6 @@
+# Keep `composer require` installs small: only src/ and data/ ship.
+/bin            export-ignore
+/tests          export-ignore
+/phpunit.xml.dist export-ignore
+/.gitattributes export-ignore
+/.gitignore     export-ignore

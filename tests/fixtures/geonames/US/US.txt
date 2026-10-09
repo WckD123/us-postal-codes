@@ -1,0 +1,4 @@
+US	94105	San Francisco	California	CA
+US	94105	FPO Repeat	California	CA
+US	9410	Bad Zip	California	CA
+US	96201	Nowhere	Armed Forces	AA

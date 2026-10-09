@@ -1,0 +1,29 @@
+{
+    "name": "wckd123/us-postal-codes",
+    "description": "Offline US ZIP code lookup (ZIP to state and city) plus US state and territory lists.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["zip code", "postal code", "us states", "address"],
+    "require": {
+        "php": "^8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0 || ^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WckD123\\UsPostalCodes\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WckD123\\UsPostalCodes\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
